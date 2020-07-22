@@ -1,0 +1,14 @@
+.feed__control {
+  text-align: center;
+}
+
+.new-post__preview-image {
+  width: 15rem;
+  height: 7rem;
+}
+
+@media (min-width: 768px) {
+  .feed__status {
+    width: 30rem;
+  }
+}
