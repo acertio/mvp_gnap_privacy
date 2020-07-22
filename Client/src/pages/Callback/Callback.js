@@ -10,6 +10,8 @@ class CallbackPage extends Component {
     super(props)
     this.state = {
       access_token: null,
+      name: null,
+      email: null,
       client_nonce: null, 
       interact_nonce: null,
       interact_handle: null,
@@ -69,7 +71,9 @@ class CallbackPage extends Component {
       return data.json()
     }).then(resultData => {
       this.setState({
-        access_token: resultData.token.access_token.value
+        access_token: resultData.token.access_token.value,
+        name: resultData.name,
+        email: resultData.email
       })
     })
   }
@@ -83,10 +87,18 @@ class CallbackPage extends Component {
               Posted on {new Date().toLocaleDateString('fr-DE')}
             </h3>
             <h3 className="post__title">
-              Access Token : 
+              Name : 
               <dd>
                 <span>
-                  {this.state.access_token}
+                  {this.state.name}
+                </span>
+              </dd>
+            </h3>
+            <h3 className="post__title">
+              Email : 
+              <dd>
+                <span>
+                  {this.state.email}
                 </span>
               </dd>
             </h3>
@@ -94,6 +106,14 @@ class CallbackPage extends Component {
               <dd>
                 <span>
                   {this.state.handle}
+                </span>
+              </dd>
+            </h3>
+            <h3 className="post__title">
+              Access Token : 
+              <dd>
+                <span>
+                  {this.state.access_token}
                 </span>
               </dd>
             </h3>

@@ -32,7 +32,9 @@ router.get('/consent', ensureAuthenticated, (req, res) =>
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                consent_handler: utils.generateRandomString(20)
+                consent_handler: utils.generateRandomString(20),
+                name: req.user.name,
+                email: req.user.email
               })
             }).then(response => {
               return response.json()

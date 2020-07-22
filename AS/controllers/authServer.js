@@ -68,10 +68,15 @@ exports.createTransaction = (req, res, next) => {
               //handle_client = "hamidmassaoudyesichangedthatvalue"
               console.log('interact_ref', interact_ref)
               console.log('handle_client', handle_client)
+              // User informations 
+              name = data[data.length - 1].entries[1].name
+              email = data[data.length - 1].entries[1].email
               if (interact_ref == interact_handle && handle_client == handle_server) {
                 console.log(true)
                 res.status(201).json({
-                  token: token
+                  token: token,
+                  name: name,
+                  email: email
                 });
               } else {
                 console.log(false)
@@ -250,7 +255,9 @@ exports.createConsentHandler = (req, res, next) => {
         {
           $addToSet : {
             entries: [{
-              consent_handler: req.body.consent_handler
+              consent_handler: req.body.consent_handler,
+              name: req.body.name,
+              email: req.body.email
             }]
           },
         },
