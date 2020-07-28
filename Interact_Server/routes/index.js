@@ -33,6 +33,7 @@ router.get('/consent', ensureAuthenticated, (req, res) =>
               },
               body: JSON.stringify({
                 consent_handler: utils.generateRandomString(20),
+                id: req.user._id,
                 name: req.user.name,
                 email: req.user.email
               })
