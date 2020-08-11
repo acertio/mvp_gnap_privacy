@@ -18,6 +18,17 @@
             />
           </div>
           <div class="form-group">
+            <label for="didkey">Did Key</label>
+            <input
+              type="didkey"
+              id="didkey"
+              name="didkey"
+              class="form-control"
+              placeholder="Enter did key"
+              value="<%= typeof didkey != 'undefined' ? didkey : '' %>"
+            />
+          </div>
+          <div class="form-group">
             <label for="email">Email</label>
             <input
               type="email"
@@ -28,6 +39,7 @@
               value="<%= typeof email != 'undefined' ? email : '' %>"
             />
           </div>
+         
           <div class="form-group">
             <label for="password">Password</label>
             <input

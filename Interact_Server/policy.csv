@@ -1,0 +1,8 @@
+p, manager, room2, open
+p, manager , room2 , check_availability
+p, manager , room1 , check_availability
+p, manager , room1 , open
+p, employee , room1 , check_availability
+p, employee , room1 , open
+g, did:key:z6Mkih6BdXRFioj1WcbpxXWuP1CfTMopSnfjhh38Bs8A9Lgd, manager
+g , did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH , employee
