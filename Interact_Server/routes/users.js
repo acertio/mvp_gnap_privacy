@@ -109,7 +109,8 @@ router.post('/consent', (req, res, next) => {
             request : {
                 uri: req.body.uri,
                 client_nonce: req.body.client_nonce,
-                server_nonce: req.body.server_nonce
+                server_nonce: req.body.server_nonce,
+                resources: req.body.resources
             }
         }]
     }); 

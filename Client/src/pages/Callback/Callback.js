@@ -10,7 +10,8 @@ class CallbackPage extends Component {
     super(props)
     this.state = {
       id: null,
-      access_token: null,
+      access_token_Room1: null,
+      access_token_Room2: null,
       name: null,
       email: null,
       client_nonce: null, 
@@ -72,7 +73,8 @@ class CallbackPage extends Component {
       return data.json()
     }).then(resultData => {
       this.setState({
-        access_token: resultData.token.access_token.value,
+        access_token_Room1: resultData.tokenRoom1.access_token.value,
+        access_token_Room2: resultData.tokenRoom2.access_token.value,
         id: resultData.id,
         name: resultData.name,
         email: resultData.email
@@ -120,10 +122,18 @@ class CallbackPage extends Component {
               </dd>
             </h3>
             <h3 className="post__title">
-              Access Token : 
+              Access Token Room 1: 
               <dd>
                 <span>
-                  {this.state.access_token}
+                  {this.state.access_token_Room1}
+                </span>
+              </dd>
+            </h3>
+            <h3 className="post__title">
+              Access Token Room 2: 
+              <dd>
+                <span>
+                  {this.state.access_token_Room2}
                 </span>
               </dd>
             </h3>

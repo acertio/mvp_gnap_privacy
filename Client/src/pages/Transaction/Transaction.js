@@ -29,13 +29,22 @@ class Transaction extends Component {
             nonce: this.generateRandomString(20)
         }
       },
-      resources : [
-        {
-          action : ["read", "write", "dolphin"],
-          locations : [],
-          datatypes : []
-        }
-      ],
+      resources : {
+        token1 : [
+          {
+            action : ["open", "check_availability"],
+            locations : ["http://localhost:8080/as/room1"],
+            datatypes : []
+          }
+        ],
+        token2 : [
+          {
+            action : ["open", "check_availability"],
+            locations : ["http://localhost:8080/as/room2"],
+            datatypes : []
+          }
+        ]
+      },
       claims: {
         subject: "02F861EA250FE40BB393AAF978C6E2A4",
         email: "user@example.com"

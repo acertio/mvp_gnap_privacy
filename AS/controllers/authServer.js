@@ -1,6 +1,5 @@
 require('dotenv').config();
 const PendingTransactionModel = require('../models/pendingTransaction');
-const ConsentHandlerModel = require('../models/consentHandler');
 const utils = require('../utils/utils');
 const base64url = require('base64url');
 const { sha3_512 }  = require('js-sha3');
@@ -47,14 +46,6 @@ exports.createTransaction = (req, res, next) => {
             // Get the interact_handle given by the AS
             const interact_handle = localStorage.getItem('interact_handle');
             console.log('interact_handle', interact_handle)
-            // Create Token 
-            const user = { name: "UserName"}
-            const token = {
-              access_token: {
-                value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET),
-                type: "bearer"
-              }
-            }
             handle_server = result[result.length - 1].entries[0].response.handle.value
             console.log('handle_server', handle_server)
             // Get the client handle and the interact_ref from DB 
@@ -72,14 +63,57 @@ exports.createTransaction = (req, res, next) => {
               id =  data[data.length - 1].entries[1].id
               name = data[data.length - 1].entries[1].name
               email = data[data.length - 1].entries[1].email
+              room1_open_check = data[data.length - 1].entries[1].resources.action[0].room1_open_check
+              room2_open_check = data[data.length - 1].entries[1].resources.action[0].room2_open_check
+              room1_checkAvailabilty = data[data.length - 1].entries[1].resources.action[0].room1_checkAvailabilty
+              room2_checkAvailabilty = data[data.length - 1].entries[1].resources.action[0].room2_checkAvailabilty
               if (interact_ref == interact_handle && handle_client == handle_server) {
                 console.log(true)
-                res.status(201).json({
-                  token: token,
-                  id: id,
-                  name: name,
-                  email: email
-                });
+                if (room1_open_check == true && room2_open_check == true) {
+                  // Create two Tokens 
+                  const user = { name: "UserName"}
+                  const tokenRoom1 = {
+                    access_token: {
+                      value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM1),
+                      type: "bearer"
+                    }
+                  }
+                  const tokenRoom2 = {
+                    access_token: {
+                      value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM2),
+                      type: "bearer"
+                    }
+                  }
+                  res.status(201).json({
+                    tokenRoom1: tokenRoom1,
+                    tokenRoom2: tokenRoom2,
+                    id: id,
+                    name: name,
+                    email: email
+                  });
+                } else {
+                    // Create one Token 
+                    const user = { name: "UserName"}
+                    const tokenRoom1 = {
+                      access_token: {
+                        value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM1),
+                        type: "bearer"
+                      }
+                    }
+                    const tokenRoom2 = {
+                      access_token: {
+                        value: null,
+                        type: "bearer"
+                      }
+                    }
+                    res.status(201).json({
+                      tokenRoom1: tokenRoom1,
+                      tokenRoom2: tokenRoom2,
+                      id: id,
+                      name: name,
+                      email: email
+                    });
+                }
               } else {
                 console.log(false)
                 res.sendStatus(404);
@@ -119,13 +153,7 @@ exports.createTransaction = (req, res, next) => {
             nonce: req.body.interact.callback.nonce
           }
         },
-        resources : [
-          {
-            action : req.body.resources[0].action,
-            locations : req.body.resources[0].locations,
-            data : req.body.resources[0].data
-          }
-        ],
+        resources: req.body.resources,
         claims: {
           subject: req.body.claims.subject,
           email: req.body.claims.email
@@ -187,6 +215,7 @@ exports.createTransaction = (req, res, next) => {
               uri: txtransaction.entries[0].request.interact.callback.uri,
               client_nonce: txtransaction.entries[0].request.interact.callback.nonce,
               server_nonce: response.server_nonce,
+              resources: txtransaction.entries[0].request.resources
             })
           })
           .then(data => {
@@ -260,7 +289,15 @@ exports.createConsentHandler = (req, res, next) => {
               consent_handler: req.body.consent_handler,
               id: req.body.id,
               name: req.body.name,
-              email: req.body.email
+              email: req.body.email,
+              resources: {
+                action : [{
+                  room1_open_check: req.body.room1_open_check,
+                  room2_open_check: req.body.room2_open_check,
+                  room1_checkAvailabilty: req.body.room1_checkAvailabilty,
+                  room2_checkAvailabilty: req.body.room2_checkAvailabilty
+                }]
+              }
             }]
           },
         },
@@ -275,14 +312,16 @@ exports.createConsentHandler = (req, res, next) => {
         })
         .then(data => {
           const secret_AS = utils.generateRandomString(30);
-          const consent_handler = data[data.length - 1].entries[1].consent_handler
+          const consent_handler = data[data.length - 1].entries[1].consent_handler;
+          const ressources = data[data.length - 1].entries[0].request.resources;
           const interact_handle = sha3_512_encode(
             [consent_handler, secret_AS].join('\n')
           );
           localStorage.setItem('interact_handle', interact_handle);
           // Add a Response to the transaction  
           res.status(201).json({
-            interact_handle: interact_handle
+            interact_handle: interact_handle,
+            resources: ressources
           });
         })
         })
@@ -295,37 +334,38 @@ exports.createConsentHandler = (req, res, next) => {
     })
 }
 
-// GET Consent Handler 
-exports.getConsentHandler = (req, res, next) => {
-  ConsentHandlerModel.find()
-    .then(values => {
-      res
-        .status(200)
-        .json({ 
-          Consent: values
-        });
-    })
-    .catch(err => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
-}
-
-// Get protected resource 
-exports.getProtectedData = (req, res, next) => {
+// Get access to Room 1 
+exports.getProtectedDataRoom1 = (req, res, next) => {
   res.json({
-    message: 'This is Protected Data'
+    message: 'This is Room 1'
   });
 }
 
-exports.authenticateToken = (req, res, next) => {
+// Get access to Room 2
+exports.getProtectedDataRoom2 = (req, res, next) => {
+  res.json({
+    message: 'This is Room 2'
+  });
+}
+
+exports.authenticateTokenRoom1 = (req, res, next) => {
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1]
   if (token == null) return res.sendStatus(401)
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM1, (err, user) => {
+    if (err) return res.sendStatus(403)
+    req.user = user
+    next()
+  })
+}
+
+exports.authenticateTokenRoom2 = (req, res, next) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if (token == null) return res.sendStatus(401)
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM2, (err, user) => {
     if (err) return res.sendStatus(403)
     req.user = user
     next()
