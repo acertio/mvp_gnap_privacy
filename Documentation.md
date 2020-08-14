@@ -91,8 +91,10 @@ You can see that in the **postTransaction** function in the Client side:
  
 The value of concealed_target_identifier is a hash of two values that we need to concatenate to each other in this order using a single newline character as a separator between the fields :
 
- 1. target_identifier_random_number : random value only known by the Client.
- 2. resourcesLocation : url of the protected resources that we want access to.
+ 1. target_identifier_random_number
+Random value only known by the Client.
+ 2. resourcesLocation
+Url of the protected resources that we want access to.
 
 In our implementation, the client has the possibility to request one/two tokens. 
 
