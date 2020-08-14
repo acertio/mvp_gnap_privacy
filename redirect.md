@@ -91,10 +91,8 @@ You can see that in the **postTransaction** function in the Client side:
  
 The value of concealed_target_identifier is a hash of two values that we need to concatenate to each other in this order using a single newline character as a separator between the fields :
 
- 1. target_identifier_random_number
-Random value only known by the Client.
- 2. resourcesLocation
-Url of the protected resources that we want access to.
+ 1. target_identifier_random_number : random value only known by the Client.
+ 2. resourcesLocation : url of the protected resources that we want access to.
 
 In our implementation, the client has the possibility to request one/two tokens. 
 
@@ -118,7 +116,6 @@ ressources: {
       }
    ],
 }
-
 ```
 And gets a response directly ***(3)*** : 
 ```
@@ -151,7 +148,7 @@ http://localhost:5000/GXqG4uen3cLdiOcAtPgh
 ```
 Once at the Interact_Server page, the user needs to login in if he already has an account otherwise he can register. For that he needs to specify a DID key that represents his unique identifier and can be used to retrieve his DID document. 
 
-In our use case, we want to attribute for every person some specifics rights based on their identity. So, we used [Casbin](https://casbin.org) to manage policies as you can see it in the file [policy.csv](). 
+In our use case, we want to attribute for every person some specifics rights based on their identity. So, we used [Casbin](https://casbin.org) to manage policies as you can see it in the file **policy.csv** in the interact server side. 
 
 We map every DID Key to a specific role and every role to some specific rights. For our example, we defined two different DID keys : 
 
