@@ -5,6 +5,7 @@ const base64url = require('base64url');
 const { sha3_512 }  = require('js-sha3');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
+const jwt_decode = require('jwt-decode');
 
 if (typeof localStorage === "undefined" || localStorage === null) {
   const LocalStorage = require('node-localstorage').LocalStorage;
@@ -71,16 +72,21 @@ exports.createTransaction = (req, res, next) => {
                 console.log(true)
                 if (room1_open_check == true && room2_open_check == true) {
                   // Create two Tokens 
-                  const user = { name: "UserName"}
+                  const payload_room1 = {
+                    concealed_target_identifier_room1 : data[data.length - 1].entries[0].request.resources.token1[0].concealed_target_identifier
+                  }
+                  const payload_room2 = {
+                    concealed_target_identifier_room2 : data[data.length - 1].entries[0].request.resources.token2[0].concealed_target_identifier
+                  }
                   const tokenRoom1 = {
                     access_token: {
-                      value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM1),
+                      value: jwt.sign(payload_room1, process.env.ACCESS_TOKEN_SECRET_ROOM1),
                       type: "bearer"
                     }
                   }
                   const tokenRoom2 = {
                     access_token: {
-                      value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM2),
+                      value: jwt.sign(payload_room2, process.env.ACCESS_TOKEN_SECRET_ROOM2),
                       type: "bearer"
                     }
                   }
@@ -93,10 +99,12 @@ exports.createTransaction = (req, res, next) => {
                   });
                 } else {
                     // Create one Token 
-                    const user = { name: "UserName"}
+                    const payload = {
+                      concealed_target_identifier_room1 : data[data.length - 1].entries[0].request.resources.token1[0].concealed_target_identifier
+                    }
                     const tokenRoom1 = {
                       access_token: {
-                        value: jwt.sign(user, process.env.ACCESS_TOKEN_SECRET_ROOM1),
+                        value: jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET_ROOM1),
                         type: "bearer"
                       }
                     }
@@ -151,7 +159,8 @@ exports.createTransaction = (req, res, next) => {
           callback: {
             uri: req.body.interact.callback.uri,
             nonce: req.body.interact.callback.nonce
-          }
+          },
+          interact_server: req.body.interact.interact_server
         },
         resources: req.body.resources,
         claims: {
@@ -173,10 +182,17 @@ exports.createTransaction = (req, res, next) => {
     .save()
     .then(() => {
       // Elements for the transaction Response 
+      let interact_server_url = null;
+      if (typeof req.body.interact.interact_server === 'undefined' || req.body.interact.interact_server === '' ) {
+        interact_server_url = "http://localhost:5000/" 
+      } else {
+        interact_server_url = req.body.interact.interact_server
+      }
+      console.log("interact_server_url", interact_server_url)
       const interaction_url_id = utils.generateRandomString(20); // Save in DB
       const server_nonce = utils.generateRandomString(20); // Save in DB 
       const response = ({
-        interaction_url : "http://localhost:5000/"  + interaction_url_id,
+        interaction_url : interact_server_url  + interaction_url_id,
         server_nonce : server_nonce,
         handle : {
           value : utils.generateRandomString(64),
@@ -348,26 +364,46 @@ exports.getProtectedDataRoom2 = (req, res, next) => {
   });
 }
 
+// Simulated RS endpoint. This is for demo purposes, in reality would be external to the AS --> ROOM1
 exports.authenticateTokenRoom1 = (req, res, next) => {
-  const authHeader = req.headers['authorization']
+  const resourcesLocation = ["http://localhost:8080/as/room1"];
+  const authHeader = req.headers['authorization'];
+  const target_identifier_random_number = req.headers['target_identifier_random_number'];
   const token = authHeader && authHeader.split(' ')[1]
-  if (token == null) return res.sendStatus(401)
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM1, (err, user) => {
-    if (err) return res.sendStatus(403)
-    req.user = user
-    next()
-  })
+  const concealed_target_identifier = sha3_512_encode(
+    [target_identifier_random_number, resourcesLocation[0]].join('\n')
+  );
+  const concealed_target_identifier_room1 = jwt_decode(token).concealed_target_identifier_room1;
+  if ( concealed_target_identifier === concealed_target_identifier_room1) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM1, (err, user) => {
+      if (err) return res.sendStatus(403)
+      req.user = user
+      next()
+    })
+  } else {
+    return res.sendStatus(401)
+  }
+  //if (token == null) return res.sendStatus(401)
 }
 
+// Simulated RS endpoint. This is for demo purposes, in reality would be external to the AS --> ROOM2
 exports.authenticateTokenRoom2 = (req, res, next) => {
-  const authHeader = req.headers['authorization']
+  const resourcesLocation = ["http://localhost:8080/as/room2"];
+  const authHeader = req.headers['authorization'];
+  const target_identifier_random_number = req.headers['target_identifier_random_number'];
   const token = authHeader && authHeader.split(' ')[1]
-  if (token == null) return res.sendStatus(401)
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM2, (err, user) => {
-    if (err) return res.sendStatus(403)
-    req.user = user
-    next()
-  })
+  const concealed_target_identifier = sha3_512_encode(
+    [target_identifier_random_number, resourcesLocation[0]].join('\n')
+  );
+  const concealed_target_identifier_room2 = jwt_decode(token).concealed_target_identifier_room2;
+  if ( concealed_target_identifier === concealed_target_identifier_room2) {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_ROOM2, (err, user) => {
+      if (err) return res.sendStatus(403)
+      req.user = user
+      next()
+    })
+  } else {
+    return res.sendStatus(401)
+  }
+  //if (token == null) return res.sendStatus(401)
 }

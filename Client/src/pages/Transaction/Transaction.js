@@ -2,6 +2,8 @@ import React, { Component, Fragment } from 'react';
 
 import Post from '../../components/Post/Post';
 import Button from '../../components/Button/Button';
+import base64url from 'base64url';
+import { sha3_512 } from 'js-sha3';
 import './Transaction.css';
 
 class Transaction extends Component {
@@ -16,7 +18,14 @@ class Transaction extends Component {
     return result;
   }
 
+  sha3_512_encode = (toHash) => {
+    return base64url.fromBase64(Buffer.from(sha3_512(toHash), 'hex').toString('base64'));
+  };
+
   postTransaction = async() => {
+    let resourcesLocations = ["http://localhost:8080/as/room1", "http://localhost:8080/as/room2"]
+    let target_identifier_random_number = this.generateRandomString(20) 
+    localStorage.setItem('target_identifier_random_number', JSON.stringify(target_identifier_random_number))
     let tx = {
       display: {
         name: "XYZ Redirect Client",
@@ -27,21 +36,24 @@ class Transaction extends Component {
         callback: {
             uri: "http://localhost:3000/Callback",
             nonce: this.generateRandomString(20)
-        }
+        },
+        interact_server: "http://localhost:5000/" 
       },
       resources : {
         token1 : [
           {
             action : ["open", "check_availability"],
-            locations : ["http://localhost:8080/as/room1"],
-            datatypes : []
+            concealed_target_identifier : this.sha3_512_encode(
+              [target_identifier_random_number, resourcesLocations[0]].join('\n')
+            )
           }
         ],
         token2 : [
           {
             action : ["open", "check_availability"],
-            locations : ["http://localhost:8080/as/room2"],
-            datatypes : []
+            concealed_target_identifier : this.sha3_512_encode(
+              [target_identifier_random_number, resourcesLocations[1]].join('\n')
+            )
           }
         ]
       },
