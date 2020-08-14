@@ -1,6 +1,5 @@
 # mvp_gnap_privacy
-proof of concept for IETF mailing list.
-we test new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/).
+test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/).
 
 ## Change log (in this version)
 
