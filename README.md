@@ -19,6 +19,8 @@ See details in [redirect.md](https://github.com/acertio/mvp_gnap_privacy/blob/ma
 This is a quick proof of concept, do not use in production. 
 We did not secure anything (not the goal of this project) and do not intend to provide support for this project. 
 
+Next step would be to implement DID to their full extend and reduce correlation ID. 
+
 ## Previous work
 
 This MVP builds on previous work, also available on our github.
