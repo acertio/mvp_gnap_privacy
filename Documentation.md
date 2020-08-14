@@ -6,9 +6,9 @@
    +--------+                                  +-------+                                        +---------------------------------+
    | Client |                                  |  AS   |                                        |      Interact_Server            |
    |        |--(1)--- txRequest -------------->|       |                                        |                                 |
-   |        |                                  |       |--(2)---- ConsentRequest--------------->|                                 |
+   |        |                                  |       |--(2)---- InteractRequest-------------->|                                 |
    |        |                                  |       |                                        |                                 | 
-   |        |                                  |       |<------- ConsentResponse-----------(3)--|                                 |   
+   |        |                                  |       |<------- InteractResponse----------(3)--|                                 |   
    |        |<---- txResponse ---(4)-----------|       |                                        |                                 | 
    |        |                                  |       |                                        |                                 |
    |        |                                  |       |           +------+                     |                                 |
@@ -16,9 +16,9 @@
    |        |--(5)--- interaction_url ---------| - - - |---------->|      |                     |  +-------+          +---------+ |
    |        |                                  |       |           |      |<-(6) http redirect--|->| Login |          | Consent | |
    |        |                                  |       |           |      |                     |  |       |<- AuthN->|         | |
-   |        |	                               |       |<---(7)----| - - -|- ConsentHandler-----|--| - - - |----------|         | |
+   |        |	                               |       |<---(7)----| - - -|- ConsentRequest-----|--| - - - |----------|         | |
    |        |                                  |       |           |      |                     |  |       |          |         | |
-   |        |                                  |       |----(8)----| - - -|- InteractHandler----|--| - - - |--------->|         | |
+   |        |                                  |       |----(8)----| - - -|- ConsentResponse----|--| - - - |--------->|         | |
    |        |                                  |       |           |      |                     |  |       |          |         | |
    |        |<- redirect to Client CallBack (9)| - - - |-----------|      |                     |  +-------+          +---------+ |
    |        |                                  |       |           |      |                     |                                 |
@@ -83,6 +83,7 @@ The client needs to remember its own state, for this reason, we have chosen to u
 
  - Transaction Request
  - Transaction Response 
+ - target_identifier_random_number
 
 You can see that in the **postTransaction** function in the Client side: 
 
@@ -92,6 +93,8 @@ The value of concealed_target_identifier is a hash of two values that we need to
 
  1. target_identifier_random_number : random value only known by the Client.
  2. resourcesLocation : url of the protected resources that we want access to.
+
+In our implementation, the client has the possibility to request one/two tokens. 
 
 #### Step 2 : [Transaction Response](https://oauth.xyz/transactionresponse/)
 Before the AS creates a unique interaction URL and returns it to the client ***(5)***. Note that the AS sends an http POST request to the Interact_Server ***(2)***:
@@ -133,7 +136,7 @@ The value of interact_nonce is a hash of two values that we need to concatenate 
  1. server_nonce
  2. consent_nonce
 
-The value of interaction_url is a unique interaction URL created by the AS. However, if the client indicated an interact_server's url, the latter is returned in lieu of interaction_url.
+The value of interaction_url is a unique interaction url created by the AS. However, if the client indicates an interact_server's url, the latter is returned in lieu of interaction_url.
 
 You can verify that in the **postTransaction** function in the Client side, by adding od deleting the value of interact_server: 
 
@@ -144,7 +147,34 @@ The client sends the user to an interactive page at the Interact_Server ***(6)**
 ```
 http://localhost:5000/GXqG4uen3cLdiOcAtPgh
 ```
-Once at the Interact_Server page, the user needs to login in if he already has an account otherwise he can register. When we know who the user is, the latter is redirected to the consent page where he can accept or deny to get the access token. Once there the Interact_Server sends an http POST request to the AS ***(7)*** :
+Once at the Interact_Server page, the user needs to login in if he already has an account otherwise he can register. For that he needs to specify a DID key that represents his unique identifier and can be used to retrieve his DID document. 
+
+In our use case, we want to attribute for every person some specifics rights based on their identity. So, we used [Casbin](https://casbin.org) to manage policies as you can see it in the file [policy.csv](). 
+
+We map every DID Key to a specific role and every role to some specific rights. For our example, we defined two different DID keys : 
+
+```
+did:key:z6Mkih6BdXRFioj1WcbpxXWuP1CfTMopSnfjhh38Bs8A9Lgd
+did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH
+```
+That respectively have the following roles : 
+
+ 1. Manager
+ 2. Employee 
+
+If a user indicates the first DID key while he registers, he would be considered as a manager and will have the rights to **Open** and **Check availability** for both: 
+
+ - Room 1
+ - Room 2
+
+else, if a user designates the second one, he would be considered as an employee and will have the rights to **Open** and **Check availability** for just : 
+
+ - Room 1
+
+When we know who the user is, the latter is redirected to the consent page where he can accept or deny to get one or two access tokens depending on how many tokens requested by the client. Note if a client requested two tokens and the user presented a DID key that is for an employee, the AS will only generated one token, the same thing if the client requested one token and the user uses a DID key for a manager, even if he has the right to **Open** and **Check availability** for both rooms, the AS will generated one token because it is what requested by the client. 
+
+Once there the Interact_Server sends an http POST request to the AS ***(7)*** :
+
 ```
 consent_handler: "8F3If9O8sp1WieDBSMeN"
 id: "did:key:z6Mkih6BdXRFioj1WcbpxXWuP1CfTMopSnfjhh38Bs8A9Lgd"
@@ -158,9 +188,9 @@ resources: {
       room2_checkAvailabilty: true
    ]
 }
-
 ```
 and gets a response that looks like ***(8)*** :
+
 ```
 interact_handle: "sgxDE79QwFgoCP5UcLheC57NFOoTI2eBy32KFuqiRwU1EuvOueZqDvTQo-eyz4-KvuzCR7RI6-4DQGPY99OaTg"
 ```
