@@ -260,6 +260,7 @@ You can verify that by :
 
 #### Improvements 
 
-One of the major improvments to our work is fiding a solution to verify the did keys provided in the register page. 
-We can't let someone use someone else did key.
-The most basic solution is the creation of a database mapping every employee with his did key and use it to verify if the did key provided match with the name and the rest of the provided informations.
+Our current use of did is not our target architecture. Currently we simply use a did key stored within the user record in the database. The did is used as part of the login process, because we didn't want to modify a flow well known to the average users. 
+The register window is not functional (wasn't a goal of this release), and so we created 2 demo users. A quick patch would require to verify the did keys provided in the register page, and make sure we have the correct authorizations for casbin in place. 
+
+Longer term objective is to implement passwordless in a proper way.
