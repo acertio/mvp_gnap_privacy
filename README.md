@@ -1,5 +1,5 @@
 # mvp_gnap_privacy
-test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/).
+Test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/).
 
 ## Change log (in this version)
 
