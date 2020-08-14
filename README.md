@@ -16,7 +16,7 @@ Changes compared to the core XYZ proposal:
 - the interact uri is now pointing to the interact server, instead of being part of the AS.
 - the callback_server_nonce has become a hash of nonces from the AS and the interact (as we now have 2 servers). 
 
-See more details in [redirect.md](https://github.com/acertio/mvp_gnap_interact/blob/master/Redirect.md#process)
+See more details in [redirect.md](https://github.com/acertio/mvp_gnap_privacy/blob/master/redirect.md)
 
 ## Status
 
