@@ -1,5 +1,5 @@
 # mvp_gnap_privacy
-Test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/).
+Test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/), code name "wizz" - which derives from a [theater exercice](http://lesmenteursdarlequin.wifeo.com/le-wizz.php)  
 
 ## Change log (in this version)
 
