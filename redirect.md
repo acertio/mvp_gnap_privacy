@@ -159,7 +159,16 @@ did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH
 That respectively have the following roles : 
 
  1. Manager
- 2. Employee 
+ 2. Employee
+
+In order to create your own did key you can use this code : 
+
+```
+const {Ed25519KeyPair} = require('crypto-ld');
+const {keyToDidDoc} = require('did-method-key').driver();
+const edKey = await Ed25519KeyPair.generate();
+keyToDidDoc(edKey);
+````
 
 If a user indicates the first DID key while he registers, he would be considered as a manager and will have the rights to **Open** and **Check availability** for both: 
 
@@ -177,8 +186,8 @@ Once there the Interact_Server sends an http POST request to the AS ***(7)*** :
 ```
 consent_handler: "8F3If9O8sp1WieDBSMeN"
 id: "did:key:z6Mkih6BdXRFioj1WcbpxXWuP1CfTMopSnfjhh38Bs8A9Lgd"
-name: "Hamid Massaoud"
-email: "hamid@gmail.com"
+name: "Manager"
+email: "manager@gmail.com"
 resources: {
    action: [
       room1_open_check: true
@@ -247,3 +256,10 @@ You can verify that by :
 
 - Changing the value of **interact_ref** or the **handle** in the server side after the **transactionContinue** function 
    > controllers/authserver.js
+
+
+#### Improvements 
+
+One of the major improvments to our work is fiding a solution to verify the did keys provided in the register page. 
+We can't let someone use someone else did key.
+The most basic solution is the creation of a database mapping every employee with his did key and use it to verify if the did key provided match with the name and the rest of the provided informations.

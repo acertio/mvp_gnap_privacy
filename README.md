@@ -1,5 +1,5 @@
 # mvp_gnap_interact
-proof of concept for IETF mailing list
+proof of concept for IETF mailing list [usecase](https://github.com/ietf-wg-gnap/general/wiki/Modular-Interaction-Server)
 
 ## Goal
 
@@ -17,6 +17,7 @@ Changes compared to the core XYZ proposal:
 - the callback_server_nonce has become a hash of nonces from the AS and the interact (as we now have 2 servers). 
 
 See more details in [redirect.md](https://github.com/acertio/mvp_gnap_privacy/blob/master/redirect.md)
+
 
 ## Status
 
@@ -70,7 +71,8 @@ By default, a request to a protected endpoint will display "unauthorized" in you
 Please copy the value of the Access Token and the target_identifier_random_number on your local Storage to get access to the protected data (for demo purposes, we implemented a protected endpoint on the as). 
 
 
-Then use `curl -H "Authorization: Bearer <token to copy>" "target_identifier_random_number: <value to copy>" http://localhost:8080/as/data`
-and you'll get access to a JSON message {"message":"This is Protected Data"}. 
+Then use `curl -H "Authorization: Bearer <token to copy>" "target_identifier_random_number: <value to copy>" http://localhost:8080/as/room1`
+and you'll get access to a JSON message {"message":"This is room 1"}. 
 
-
+Then use `curl -H "Authorization: Bearer <token to copy>" "target_identifier_random_number: <value to copy>" http://localhost:8080/as/room2`
+and you'll get access to a JSON message {"message":"This is room 2"}. 
