@@ -4,7 +4,7 @@ Test of new features for [GNAP](https://datatracker.ietf.org/wg/gnap/about/), co
 ## Change log (in this version)
 
 * basic support for DID 
-* support for automated authorization policies
+* support for automated authorization policies (useful when the end-user != resource owner)
 * support of RS hiding, see [privacy](https://github.com/acertio/mvp_gnap_privacy/blob/master/privacy.md)
 * the IS can be chosen by the Client
 * IS improvement: the consent result is sent to the AS (instead of harcoded in previous MVP)
