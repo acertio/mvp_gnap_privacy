@@ -13,7 +13,7 @@ The value of the concealed_target_identifier should be included in the request a
 
  #### Step 2 : AS
 
-The value of the concealed_target_identifier sent by the client will be included in the payload of the access token generated to get the protected resources. In our demo we use a jwt token signed by a symmetric key. 
+The value of the concealed_target_identifier sent by the client will be included in the payload of the access token generated to get the protected resources. In our demo we use a jwt token signed by his private key (currently implemented using a symmetric alg, for simplicity). 
 
  #### Step 3 : Client
 
